@@ -3,7 +3,7 @@ services:
   # БД для сервиса управления заметками
   db_notes:
     # Название контейнера
-    container_name: db_notes
+    container_name: db_notes 
     # Значения переменных окружения
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
@@ -22,7 +22,7 @@ services:
     # Объявляем внутренную сеть докера, для 
     # передачи данных между контейнерами
     networks:
-      - server_net
+      - notes-manager
   
   redis_notes:
     # Название контейнера
@@ -41,9 +41,33 @@ services:
     # Объявляем внутренную сеть докера, для 
     # передачи данных между контейнерами
     networks:
-      - server_net
+      - notes-manager
 
+  notes:
+    container_name: notes
+    build: ./notes
+
+    depends_on:
+      - db_notes
+      - redis_notes
     
+    networks:
+      - notes-manager
+    
+    ports:
+      - ${NOTES_PORT}:${NOTES_PORT}
+
+    environment:
+      NOTES_PORT: ${NOTES_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+
+
 # Конфигурация для хранилища данных
 volumes:
   db_notes_vol: {}
@@ -51,6 +75,6 @@ volumes:
 
 # Настройки сетей
 networks:
-  server_net:
+  notes-manager:
     driver: bridge
   

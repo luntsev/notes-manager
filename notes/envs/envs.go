@@ -2,8 +2,6 @@ package envs
 
 import (
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 type Envs struct {
@@ -15,16 +13,12 @@ type Envs struct {
 
 	RedisHost string
 	RedisPort string
+	JwtSecret string
 }
 
 var ServerEnvs Envs
 
-func LoadEnvs() error {
-	err := godotenv.Load()
-	if err != nil {
-		return err
-	}
-
+func LoadEnvs() {
 	ServerEnvs.MongoHost = os.Getenv("MONGO_HOST")
 	ServerEnvs.MongoPort = os.Getenv("MONGO_PORT")
 	ServerEnvs.MongoUser = os.Getenv("MONGO_USER")
@@ -34,5 +28,5 @@ func LoadEnvs() error {
 	ServerEnvs.RedisHost = os.Getenv("REDIS_HOST")
 	ServerEnvs.RedisPort = os.Getenv("REDIS_PORT")
 
-	return nil
+	ServerEnvs.JwtSecret = os.Getenv("JWT_SECRET")
 }
