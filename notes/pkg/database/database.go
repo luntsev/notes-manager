@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"notes-manager/configs"
 	"notes-manager/envs"
 	"time"
 
@@ -13,6 +14,39 @@ import (
 )
 
 var MongoClient *mongo.Client
+
+type MondoDB struct {
+	Client *mongo.Client
+}
+
+func NewMongoDB(config *configs.Config) *MondoDB {
+	mongoURI := fmt.Sprintf("mongo://%s:%s@%s:%s",
+		config.Db.MongoUser,
+		config.Db.MongoPass,
+		config.Db.MongoHost,
+		config.Db.MongoPort)
+
+	if config.LogLevel == configs.DebugLog {
+		log.Println("MongoDB URI:", mongoURI)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	mongo, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
+	if err != nil {
+		panic(err)
+	}
+
+	err = mongo.Ping(ctx, readpref.Primary())
+	if err != nil {
+		panic(err)
+	}
+
+	return &MondoDB{
+		Client: mongo,
+	}
+}
 
 func InitDatabase() error {
 	env := &envs.ServerEnvs
