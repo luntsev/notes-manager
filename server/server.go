@@ -18,6 +18,12 @@ func InitServer() {
 	} else {
 		log.Println("Выполнено подключение к базе данных")
 	}
+
+	if err := database.InitRedis(); err != nil {
+		log.Fatal("Не удалось подключиться к Redis:", err.Error())
+	} else {
+		log.Println("Выполнено подключение к Redis")
+	}
 }
 
 func StartServer() {

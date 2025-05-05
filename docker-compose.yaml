@@ -1,4 +1,3 @@
-version: '3.1'
 
 services:
   # БД для сервиса управления заметками
@@ -7,7 +6,7 @@ services:
     container_name: db_notes
     # Значения переменных окружения
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     # Образ для контейнера который будет скачан из DockerHub
     image: mongo:5.0.25
@@ -24,11 +23,31 @@ services:
     # передачи данных между контейнерами
     networks:
       - server_net
+  
+  redis_notes:
+    # Название контейнера
+    container_name: redis_notes
+     # Образ для контейнера который будет скачан из DockerHub
+    image: redis:7.2.4
+    # Меняем порт Redis в контейнере
+    command: --port ${REDIS_PORT}
+    # Порты, которые будут использоваться в контейнере
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    # Настройки хранилища данных, необходим для сохранения
+    # данных в базе данных при остановке контейнера
+    volumes:
+      - redis-data:/data
+    # Объявляем внутренную сеть докера, для 
+    # передачи данных между контейнерами
+    networks:
+      - server_net
 
     
 # Конфигурация для хранилища данных
 volumes:
   db_notes_vol: {}
+  redis-data: {}
 
 # Настройки сетей
 networks:

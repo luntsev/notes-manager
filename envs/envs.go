@@ -12,6 +12,9 @@ type Envs struct {
 	MongoUser string
 	MongoPass string
 	NotesPort string
+
+	RedisHost string
+	RedisPort string
 }
 
 var ServerEnvs Envs
@@ -27,6 +30,9 @@ func LoadEnvs() error {
 	ServerEnvs.MongoUser = os.Getenv("MONGO_USER")
 	ServerEnvs.MongoPass = os.Getenv("MONGO_PASSWORD")
 	ServerEnvs.NotesPort = os.Getenv("NOTES_PORT")
+
+	ServerEnvs.RedisHost = os.Getenv("REDIS_HOST")
+	ServerEnvs.RedisPort = os.Getenv("REDIS_PORT")
 
 	return nil
 }
