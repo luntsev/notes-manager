@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"notes-manager/database"
+	"notes-manager/configs"
 	"notes-manager/models"
+	"notes-manager/repository"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -15,41 +16,55 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+type NotesHandler struct {
+	repo     *repository.NotesRepository
+	logLevel string
+}
+
+func NewNotesHandler(notesRepo *repository.NotesRepository, conf configs.Config) *NotesHandler {
+	return &NotesHandler{
+		repo:     notesRepo,
+		logLevel: conf.LogLevel,
+	}
+}
+
 // Создание новой заметки
-func CreateNoteHandler(ctx *gin.Context) {
+func (h *NotesHandler) Create(ctx *gin.Context) {
 	var note models.Note
 	if err := ctx.ShouldBindJSON(&note); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		h.writeToLog(fmt.Sprint("Bad request to create note:", err.Error()))
 		return
 	}
 
 	note.Id = uuid.NewString()
 	note.AuthorId = 1
 
-	collection := database.MongoClient.Database("admin").Collection(fmt.Sprintf("notes/%d", note.AuthorId))
-	result, err := collection.InsertOne(ctx, note)
+	result, err := h.repo.Create(&note, ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		h.writeToLog(fmt.Sprint("Unable to create note", err.Error()))
+		return
 	}
 
-	go resetCache(fmt.Sprintf("notes/%d", note.AuthorId))
 	ctx.JSON(http.StatusOK, gin.H{
 		"note":    result,
 		"message": "Заметка успешно добавлена",
 	})
-
+	if h.logLevel == configs.DebugLog {
+		log.Println("Note is Created")
+	}
 }
 
 // Получение заметки по ID
-func GetNoteHandler(ctx *gin.Context) {
-	var note models.Note
+func (h *NotesHandler) Get(ctx *gin.Context) {
 	id := ctx.Param("id")
-	filter := bson.M{"id": id}
+	var authorId uint = 1
 
-	collection := database.MongoClient.Database("admin").Collection(fmt.Sprintf("notes/%d", 1))
-
-	if err := collection.FindOne(ctx, filter).Decode(&note); err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"err": err.Error()})
+	note, err := h.repo.Read(id, authorId, ctx)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		h.writeToLog("Note was not found when reading")
 		return
 	}
 
@@ -57,66 +72,59 @@ func GetNoteHandler(ctx *gin.Context) {
 }
 
 // Изменение заметки по ID
-func UpdateNoteHandler(ctx *gin.Context) {
+func (h *NotesHandler) Update(ctx *gin.Context) {
 	var note models.Note
 	if err := ctx.ShouldBindJSON(&note); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		h.writeToLog(fmt.Sprint("Bad request to update note:", err.Error()))
 		return
 	}
 
-	authorId := 1
-	collection := database.MongoClient.Database("admin").Collection(fmt.Sprintf("notes/%d", authorId))
-
-	updateFilds := bson.M{}
-	if note.Name != nil {
-		updateFilds["name"] = note.Name
-	}
-	if note.Content != nil {
-		updateFilds["content"] = note.Content
-	}
-	update := bson.M{"$set": updateFilds}
-
-	id := ctx.Param("id")
-	filter := bson.M{"id": id}
-
-	result, err := collection.UpdateOne(ctx, filter, update)
+	note.AuthorId = 1
+	note.Id = ctx.Param("id")
+	err := h.repo.Update(&note, ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	if result.MatchedCount == 0 {
-		ctx.JSON(http.StatusOK, gin.H{"message": "Заметка не найдена"})
+		h.writeToLog(fmt.Sprint("Note was not update:", err.Error()))
 		return
 	}
 
-	go resetCache(fmt.Sprintf("notes/%d", note.AuthorId))
-	ctx.JSON(http.StatusOK, gin.H{"message": result})
+	ctx.JSON(http.StatusOK, gin.H{"message": "Заметка обновлена"})
+	h.writeToLog("Note was update")
 }
 
 // Удаление заметки по ID
-func DeleteNoteHandler(ctx *gin.Context) {
+func (h *NotesHandler) Delete(ctx *gin.Context) {
 	id := ctx.Param("id")
-	filter := bson.M{"id": id}
-	authorId := 1
+	var authorId uint = 1
 
-	collection := database.MongoClient.Database("admin").Collection(fmt.Sprintf("notes/%d", authorId))
-
-	result, err := collection.DeleteOne(ctx, filter)
+	delCount, err := h.repo.Delete(id, authorId, ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error:": err.Error()})
+		h.writeToLog(fmt.Sprint("Error when delete note:", err.Error()))
 		return
 	}
 
-	if result.DeletedCount == 0 {
+	if delCount == 0 {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error:": "запись не удалена"})
+		h.writeToLog(fmt.Sprint("Note was not delete:", err.Error()))
 		return
 	}
 
-	go resetCache(fmt.Sprintf("notes/%d", authorId))
-	ctx.JSON(http.StatusOK, gin.H{"message": result})
+	ctx.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("Удалено %d записей", delCount)})
+	h.writeToLog("Note was delete")
 }
 
 // Получение списка всех заметок
+func (h *NotesHandler) GetList(ctx *gin.Context) {
+	var authorId uint = 1
+
+	notes, err := h.repo.List(authorId, ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+}
+
 func GetListNotesHandler(ctx *gin.Context) {
 	authorId := 1
 	var notes []models.Note
@@ -176,6 +184,8 @@ func recordToCache(notes []models.Note, authorId int) error {
 	return nil
 }
 
-func resetCache(collection string) (int64, error) {
-	return database.RedisClient.Del(collection).Result()
+func (h *NotesHandler) writeToLog(msg string) {
+	if h.logLevel == configs.DebugLog {
+		log.Println(msg)
+	}
 }

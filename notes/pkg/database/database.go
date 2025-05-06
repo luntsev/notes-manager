@@ -6,6 +6,8 @@ import (
 	"log"
 	"notes-manager/configs"
 	"notes-manager/envs"
+	"notes-manager/pkg/enum"
+	"notes-manager/pkg/logs"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,20 +17,19 @@ import (
 
 var MongoClient *mongo.Client
 
-type MondoDB struct {
-	Client *mongo.Client
+type MongoDB struct {
+	Db     *mongo.Client
+	Logger *logs.Logger
 }
 
-func NewMongoDB(config *configs.Config) *MondoDB {
+func NewMongoDB(conf *configs.Config, logger *logs.Logger) *MongoDB {
 	mongoURI := fmt.Sprintf("mongo://%s:%s@%s:%s",
-		config.Db.MongoUser,
-		config.Db.MongoPass,
-		config.Db.MongoHost,
-		config.Db.MongoPort)
+		conf.MongoDataBase.MongoUser,
+		conf.MongoDataBase.MongoPass,
+		conf.MongoDataBase.MongoHost,
+		conf.MongoDataBase.MongoPort)
 
-	if config.LogLevel == configs.DebugLog {
-		log.Println("MongoDB URI:", mongoURI)
-	}
+	logger.WriteToLog(fmt.Sprint("MongoDB URI:", mongoURI), enum.InfoMsg)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -43,8 +44,11 @@ func NewMongoDB(config *configs.Config) *MondoDB {
 		panic(err)
 	}
 
-	return &MondoDB{
-		Client: mongo,
+	logger.WriteToLog("Successful connection to the database", enum.InfoMsg)
+
+	return &MongoDB{
+		Db:     mongo,
+		Logger: logger,
 	}
 }
 
