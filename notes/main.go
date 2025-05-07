@@ -1,13 +1,9 @@
 package main
 
 import (
-	"log"
-	"notes-manager/configs"
-	"notes-manager/pkg/database"
-	"notes-manager/repository"
-	"notes-manager/server"
-
 	"github.com/joho/godotenv"
+	"log"
+	"notes-manager/server"
 )
 
 func init() {
@@ -17,16 +13,6 @@ func init() {
 }
 
 func main() {
-	config, err := configs.LoadConfig()
-	if err != nil {
-		panic(err)
-	}
-
-	notesDb := database.NewMongoDB(config)
-	notesRepo := repository.NewNotesRepository(config, notesDb)
-
-	if err != nil {
-		panic(err.Error())
-	}
-	server.StartServer()
+	router := server.InitServer()
+	server.StartServer(router)
 }

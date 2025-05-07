@@ -46,7 +46,7 @@ func LoadConfig() (*Config, error) {
 			RedisPort: os.Getenv("REDIS_PORT"),
 		},
 		Auth: AuthConfig{
-			JwtSecret: os.Getenv("SECRET"),
+			JwtSecret: os.Getenv("JWT_SECRET"),
 		},
 	}
 

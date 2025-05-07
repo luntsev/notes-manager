@@ -16,19 +16,18 @@ func NewLogger(conf *configs.Config) *Logger {
 	}
 }
 
-func (l *Logger) WriteToLog(msg string, msgType int) {
-	switch l.logLevel {
-	case enum.Debug:
-		log.Println(msg)
-	case enum.Normal:
-		if msgType == enum.ErrorMsg || msgType == enum.WarningMsg {
-			log.Println(msg)
-		}
-	case enum.Silent:
-		if msgType == enum.ErrorMsg {
-			log.Println(msg)
-		}
-	default:
-		log.Println("logging level is undefined:", msg)
+func (l *Logger) WriteInfo(msg string) {
+	if l.logLevel == enum.Debug {
+		log.Println("INFO:", msg)
 	}
+}
+
+func (l *Logger) WriteWarn(msg string) {
+	if l.logLevel == enum.Debug || l.logLevel == enum.Normal {
+		log.Println("WARNING:", msg)
+	}
+}
+
+func (l *Logger) WriteError(msg string) {
+	log.Println("ERROR:", msg)
 }

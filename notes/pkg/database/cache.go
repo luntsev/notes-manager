@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"notes-manager/configs"
 	"notes-manager/envs"
 	"notes-manager/models"
-	"notes-manager/pkg/enum"
 	"notes-manager/pkg/logs"
 	"time"
 
@@ -20,12 +18,12 @@ type RedisDB struct {
 	logger *logs.Logger
 }
 
-func NewRedisDB(conf *configs.Config, logs *logs.Logger) (*RedisDB, error) {
+func NewRedisDB(conf *configs.Config, logger *logs.Logger) (*RedisDB, error) {
 	redisURI := fmt.Sprintf("%s:%s", envs.ServerEnvs.RedisHost, envs.ServerEnvs.RedisPort)
 
-	logs.WriteToLog(fmt.Sprint("Redis URI:", redisURI), enum.InfoMsg)
+	logger.WriteInfo(fmt.Sprintf("Redis URI: %s", redisURI))
 
-	RedisClient = redis.NewClient(&redis.Options{
+	RedisClient := redis.NewClient(&redis.Options{
 		Addr:     redisURI,
 		Password: "",
 		DB:       0,
@@ -33,87 +31,66 @@ func NewRedisDB(conf *configs.Config, logs *logs.Logger) (*RedisDB, error) {
 
 	if echoResp := RedisClient.Ping(); echoResp.Val() != "PONG" {
 		err := errors.New(echoResp.Val())
+		logger.WriteError(fmt.Sprintf("Unable connect to Radis cache: %s", err.Error()))
 		return nil, err
 	}
 
-	logs.WriteToLog("Successful connection to the Radis chache", enum.InfoMsg)
+	logger.WriteInfo("Successful connection to the Radis chache")
 
 	return &RedisDB{
 		Cache:  RedisClient,
-		logger: logs,
+		logger: logger,
 	}, nil
 }
 
-func (cache *RedisDB) RecordToChache(notes []models.Note, authorId int) error {
+func (cache *RedisDB) WriteToChache(notes *[]models.Note, authorId int) error {
 	notesJson, err := json.Marshal(notes)
 	if err != nil {
-		cache.logger.WriteToLog(fmt.Sprint("Unable to marshaling notes list for caching:", err.Error()), enum.ErrorMsg)
+		cache.logger.WriteError(fmt.Sprintf("Unable to marshaling notes list for caching: %s", err.Error()))
 		return err
 	}
 
 	collection := fmt.Sprintf("notes/%d", authorId)
 	if err := cache.Cache.Set(collection, string(notesJson), time.Minute*1440).Err(); err != nil {
-		cache.logger.WriteToLog(fmt.Sprint("Unable to caching notes list", err.Error()), enum.ErrorMsg)
+		cache.logger.WriteError(fmt.Sprintf("Unable to caching notes list: %s", err.Error()))
 		return err
 	}
 
-	cache.logger.WriteToLog("Notes list is cached", enum.InfoMsg)
+	cache.logger.WriteInfo("Notes list is cached")
 	return nil
 }
 
-func (cache *RedisDB) ReadFromCache(authorId uint) ([]models.Note, error) {
+func (cache *RedisDB) ReadFromCache(authorId uint) (*[]models.Note, error) {
 	collection := fmt.Sprintf("notes/%d", authorId)
 
 	records, err := cache.Cache.Get(collection).Result()
 	if err == redis.Nil {
-		if cache.logLevel == configs.DebugLog {
-			log.Println("Cache is empty:", err.Error())
-		}
+		cache.logger.WriteWarn(fmt.Sprintf("Cache is empty: %s", err.Error()))
 		return nil, err
 	} else if err != nil {
-
-	} else if cache.logLevel == configs.DebugLog {
-		log.Println("Reading data from cache")
+		cache.logger.WriteError(fmt.Sprintf("Cache readint error: %s", err.Error()))
+		return nil, err
 	}
+	cache.logger.WriteInfo("Reading data from cache")
 
 	var notes []models.Note
 	err = json.Unmarshal([]byte(records), &notes)
 	if err != nil {
-		log.Fatalln("Unable unmarshaling records from cache:", err.Error())
+		cache.logger.WriteError(fmt.Sprintf("Unable unmarshaling records from cache:", err.Error()))
 		return nil, err
 	}
 
-	return notes, nil
+	return &notes, nil
 }
 
-func (cache *RedisDB) ResetCache(authorId int) (int64, error) {
+func (cache *RedisDB) ResetCache(authorId uint) (int64, error) {
 	collection := fmt.Sprintf("notes/%d", authorId)
 
 	result, err := cache.Cache.Del(collection).Result()
 	if err != nil {
-		log.Fatalf("Cache reset error:", err.Error())
+		cache.logger.WriteError(fmt.Sprintf("Cache reset error: %s", err.Error()))
 		return result, err
-	} else if cache.logLevel == configs.DebugLog {
-		log.Printf("Cache has been reset. %d records deleted", result)
 	}
+	cache.logger.WriteInfo(fmt.Sprintf("Cache has been reset. %d records deleted", result))
 	return result, nil
-}
-
-func (cache *RedisDB) writeToLog(msg)
-
-var RedisClient *redis.Client
-
-func InitRedis() error {
-	redisURI := fmt.Sprintf("%s:%s", envs.ServerEnvs.RedisHost, envs.ServerEnvs.RedisPort)
-	RedisClient = redis.NewClient(&redis.Options{
-		Addr:     redisURI,
-		Password: "",
-		DB:       0,
-	})
-
-	if echoResp := RedisClient.Ping(); echoResp.Val() != "PONG" {
-		err := errors.New(echoResp.Val())
-		return err
-	}
-	return nil
 }
