@@ -1,13 +1,18 @@
 package configs
 
 import (
+	"errors"
 	"os"
+	"strconv"
+
+	"github.com/luntsev/notes-manager/notes/pkg/enum"
 )
 
 type Config struct {
 	LogLevel         int
 	PostgresDataBase DbConfig
 	Jwt              JwtConfig
+	Port             int
 }
 
 type DbConfig struct {
@@ -38,6 +43,14 @@ func LoadConfig() (*Config, error) {
 		},
 	}
 
+	port, err := strconv.Atoi(os.Getenv("AUTH_PORT"))
+	if err != nil {
+		return nil, err
+	} else if port <= 0 {
+		return nil, errors.New("bad port in envarenment variable")
+	}
+	conf.Port = port
+
 	logLevelStr := os.Getenv("LOG_LEVEL")
 	switch logLevelStr {
 	case "debug":
@@ -50,4 +63,5 @@ func LoadConfig() (*Config, error) {
 		return nil, errors.New("logging level is set incorrectly")
 	}
 
+	return conf, nil
 }

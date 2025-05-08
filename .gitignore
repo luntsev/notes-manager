@@ -1,2 +1,6 @@
 /.vscode
 .env
+/notes/.env
+/notes/envs/*
+/auth/.env
+/auth/envs/*

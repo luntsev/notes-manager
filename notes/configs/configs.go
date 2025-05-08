@@ -2,8 +2,10 @@ package configs
 
 import (
 	"errors"
-	"github.com/luntsev/notes-manager/notes/pkg/enum"
 	"os"
+	"strconv"
+
+	"github.com/luntsev/notes-manager/notes/pkg/enum"
 )
 
 type Config struct {
@@ -11,6 +13,7 @@ type Config struct {
 	MongoDataBase DbConfig
 	RedisCache    CacheConfig
 	Jwt           JwtConfig
+	Port          int
 }
 
 type DbConfig struct {
@@ -32,6 +35,7 @@ type JwtConfig struct {
 }
 
 func LoadConfig() (*Config, error) {
+
 	conf := &Config{
 		MongoDataBase: DbConfig{
 			MongoHost:   os.Getenv("MONGO_HOST"),
@@ -49,6 +53,14 @@ func LoadConfig() (*Config, error) {
 			JwtSecret: os.Getenv("JWT_SECRET"),
 		},
 	}
+
+	port, err := strconv.Atoi(os.Getenv("NOTES_PORT"))
+	if err != nil {
+		return nil, err
+	} else if port <= 0 {
+		return nil, errors.New("bad port in envarenment variable")
+	}
+	conf.Port = port
 
 	logLevelStr := os.Getenv("LOG_LEVEL")
 	switch logLevelStr {

@@ -1,7 +1,7 @@
 package server
 
 import (
-	"auth/handlers"
+	"github.com/notes-manager/auth/handlers"
 
 	"github.com/gin-gonic/gin"
 )

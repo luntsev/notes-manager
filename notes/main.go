@@ -14,5 +14,5 @@ func init() {
 
 func main() {
 	noteServer := server.NewServer()
-	noteServer.Start(9100)
+	noteServer.Start()
 }

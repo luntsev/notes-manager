@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-var MongoClient *mongo.Client
-
 type MongoDB struct {
 	Db     *mongo.Client
 	Logger *logs.Logger

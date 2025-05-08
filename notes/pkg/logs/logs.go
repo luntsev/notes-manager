@@ -1,7 +1,6 @@
 package logs
 
 import (
-	"github.com/luntsev/notes-manager/notes/configs"
 	"github.com/luntsev/notes-manager/notes/pkg/enum"
 	"log"
 )
@@ -10,9 +9,9 @@ type Logger struct {
 	logLevel int
 }
 
-func NewLogger(conf *configs.Config) *Logger {
+func NewLogger(level int) *Logger {
 	return &Logger{
-		logLevel: conf.LogLevel,
+		logLevel: level,
 	}
 }
 

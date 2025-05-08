@@ -6,13 +6,13 @@ import (
 	"github.com/luntsev/notes-manager/notes/pkg/database"
 	"github.com/luntsev/notes-manager/notes/pkg/logs"
 	"github.com/luntsev/notes-manager/notes/repository"
-	"log"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
 	router *gin.Engine
+	port   int
 }
 
 func NewServer() *Server {
@@ -21,7 +21,7 @@ func NewServer() *Server {
 		panic(err)
 	}
 
-	logger := logs.NewLogger(conf)
+	logger := logs.NewLogger(conf.LogLevel)
 	notesDb := database.NewMongoDB(conf, logger)
 	cache, err := database.NewRedisDB(conf, logger)
 	if err != nil {
@@ -32,12 +32,12 @@ func NewServer() *Server {
 	notesRepo := repository.NewNotesRepository(conf, notesDb, cache, logger)
 
 	noteRouter := NewRouter(notesRepo, logger)
-	return &Server{router: noteRouter.router}
+	return &Server{
+		router: noteRouter.router,
+		port:   conf.Port,
+	}
 }
 
-func (s *Server) Start(port int) {
-	if port <= 0 {
-		log.Fatalf("Invalid port: %d", port)
-	}
-	s.router.Run(fmt.Sprintf(":%d", port))
+func (s *Server) Start() {
+	s.router.Run(fmt.Sprintf(":%d", s.port))
 }
