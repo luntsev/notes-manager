@@ -11,20 +11,20 @@ import (
 	"github.com/google/uuid"
 )
 
-type NotesHandler struct {
+type notesHandler struct {
 	repo   *repository.NotesRepository
 	logger *logs.Logger
 }
 
-func NewNotesHandler(notesRepo *repository.NotesRepository, logs *logs.Logger) *NotesHandler {
-	return &NotesHandler{
+func NewNotesHandler(notesRepo *repository.NotesRepository, logs *logs.Logger) *notesHandler {
+	return &notesHandler{
 		repo:   notesRepo,
 		logger: logs,
 	}
 }
 
 // Создание новой заметки
-func (h *NotesHandler) Create(ctx *gin.Context) {
+func (h *notesHandler) Create(ctx *gin.Context) {
 	var note models.Note
 	if err := ctx.ShouldBindJSON(&note); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -48,7 +48,7 @@ func (h *NotesHandler) Create(ctx *gin.Context) {
 }
 
 // Получение заметки по ID
-func (h *NotesHandler) Get(ctx *gin.Context) {
+func (h *notesHandler) Get(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var authorId uint = 1
 
@@ -62,7 +62,7 @@ func (h *NotesHandler) Get(ctx *gin.Context) {
 }
 
 // Изменение заметки по ID
-func (h *NotesHandler) Update(ctx *gin.Context) {
+func (h *notesHandler) Update(ctx *gin.Context) {
 	var note models.Note
 	if err := ctx.ShouldBindJSON(&note); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -82,7 +82,7 @@ func (h *NotesHandler) Update(ctx *gin.Context) {
 }
 
 // Удаление заметки по ID
-func (h *NotesHandler) Delete(ctx *gin.Context) {
+func (h *notesHandler) Delete(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var authorId uint = 1
 
@@ -101,7 +101,7 @@ func (h *NotesHandler) Delete(ctx *gin.Context) {
 }
 
 // Получение списка всех заметок
-func (h *NotesHandler) GetList(ctx *gin.Context) {
+func (h *notesHandler) GetList(ctx *gin.Context) {
 	var authorId uint = 1
 
 	notes, err := h.repo.List(authorId, ctx.Request.Context())

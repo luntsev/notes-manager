@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"notes-manager/configs"
-	"notes-manager/envs"
 	"notes-manager/models"
 	"notes-manager/pkg/logs"
 	"time"
@@ -19,7 +18,7 @@ type RedisDB struct {
 }
 
 func NewRedisDB(conf *configs.Config, logger *logs.Logger) (*RedisDB, error) {
-	redisURI := fmt.Sprintf("%s:%s", envs.ServerEnvs.RedisHost, envs.ServerEnvs.RedisPort)
+	redisURI := fmt.Sprintf("%s:%s", conf.RedisCache.RedisHost, conf.RedisCache.RedisPort)
 
 	logger.WriteInfo(fmt.Sprintf("Redis URI: %s", redisURI))
 
@@ -76,7 +75,7 @@ func (cache *RedisDB) ReadFromCache(authorId uint) (*[]models.Note, error) {
 	var notes []models.Note
 	err = json.Unmarshal([]byte(records), &notes)
 	if err != nil {
-		cache.logger.WriteError(fmt.Sprintf("Unable unmarshaling records from cache:", err.Error()))
+		cache.logger.WriteError(fmt.Sprintf("Unable unmarshaling records from cache: %s", err.Error()))
 		return nil, err
 	}
 

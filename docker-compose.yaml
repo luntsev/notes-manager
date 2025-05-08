@@ -46,17 +46,13 @@ services:
   notes:
     container_name: notes
     build: ./notes
-
     depends_on:
       - db_notes
       - redis_notes
-    
     networks:
       - notes-manager
-    
     ports:
       - ${NOTES_PORT}:${NOTES_PORT}
-
     environment:
       NOTES_PORT: ${NOTES_PORT}
       JWT_SECRET: ${JWT_SECRET}
@@ -64,14 +60,43 @@ services:
       MONGO_PORT: ${MONGO_PORT}
       MONGO_USER: ${MONGO_USER}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      LOG_LEVEL: ${LOG_LEVEL}
 
+  # БД для сервиса управления пользователями 
+  db_auth:
+    # Название контейнера
+    container_name: db_auth
+    # Значения переменных окружения
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # Образ для контейнера который будет скачан из DockerHub
+    image: postgres:15-alpine
+    # Порты, которые будут использоваться в контейнере
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    # Меняем порт по умолчанию в Postgres контейнере
+    command:
+      - 'postgres'
+      - '-c'
+      - 'port=${POSTGRES_PORT}'
+    # Настройки хранилища данных, необходим для сохранения
+    # данных в базе данных при остановке контейнера
+    volumes:
+      - db_auth_vol:/var/lib/postgresql/data
+    # Объявляем внутренную сеть докера, для 
+    # передачи данных между контейнерами
+    networks:
+      - notes-manager
 
 # Конфигурация для хранилища данных
 volumes:
   db_notes_vol: {}
   redis-data: {}
+  db_auth_vol: {}
 
 # Настройки сетей
 networks:

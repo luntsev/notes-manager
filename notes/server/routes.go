@@ -8,12 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type NotesHandler struct {
-	*repository.NotesRepository
-	*logs.Logger
+type notesRouter struct {
+	router *gin.Engine
 }
 
-func InitRoutes(repo *repository.NotesRepository, logger *logs.Logger) *gin.Engine {
+func NewRouter(repo *repository.NotesRepository, logger *logs.Logger) *notesRouter {
 	handlers := handlers.NewNotesHandler(repo, logger)
 
 	router := gin.Default()
@@ -24,5 +23,5 @@ func InitRoutes(repo *repository.NotesRepository, logger *logs.Logger) *gin.Engi
 	router.DELETE("/note/:id", handlers.Delete) // Удаление заметки
 	router.GET("/notes", handlers.GetList)      // Получение списка заметок
 
-	return router
+	return &notesRouter{router: router}
 }

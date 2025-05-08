@@ -10,7 +10,7 @@ type Config struct {
 	LogLevel      int
 	MongoDataBase DbConfig
 	RedisCache    CacheConfig
-	Auth          AuthConfig
+	Jwt           JwtConfig
 }
 
 type DbConfig struct {
@@ -27,7 +27,7 @@ type CacheConfig struct {
 	RedisPort string
 }
 
-type AuthConfig struct {
+type JwtConfig struct {
 	JwtSecret string
 }
 
@@ -45,7 +45,7 @@ func LoadConfig() (*Config, error) {
 			RedisHost: os.Getenv("REDIS_HOST"),
 			RedisPort: os.Getenv("REDIS_PORT"),
 		},
-		Auth: AuthConfig{
+		Jwt: JwtConfig{
 			JwtSecret: os.Getenv("JWT_SECRET"),
 		},
 	}
@@ -79,7 +79,7 @@ func LoadConfig() (*Config, error) {
 		return nil, errors.New("the REDIS_HOST environment variable is not set")
 	case conf.RedisCache.RedisPort == "":
 		return nil, errors.New("the REDIS_PORT environment variable is not set")
-	case conf.Auth.JwtSecret == "":
+	case conf.Jwt.JwtSecret == "":
 		return nil, errors.New("the SECRET environment variable is not set")
 	default:
 		return conf, nil

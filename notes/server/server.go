@@ -2,17 +2,20 @@ package server
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
+	"log"
 	"notes-manager/configs"
-	"notes-manager/envs"
 	"notes-manager/pkg/database"
 	"notes-manager/pkg/logs"
 	"notes-manager/repository"
+
+	"github.com/gin-gonic/gin"
 )
 
-func InitServer() *gin.Engine {
-	envs.LoadEnvs()
+type Server struct {
+	router *gin.Engine
+}
 
+func NewServer() *Server {
 	conf, err := configs.LoadConfig()
 	if err != nil {
 		panic(err)
@@ -28,9 +31,13 @@ func InitServer() *gin.Engine {
 
 	notesRepo := repository.NewNotesRepository(conf, notesDb, cache, logger)
 
-	return InitRoutes(notesRepo, logger)
+	noteRouter := NewRouter(notesRepo, logger)
+	return &Server{router: noteRouter.router}
 }
 
-func StartServer(router *gin.Engine) {
-	router.Run(":9100")
+func (s *Server) Start(port int) {
+	if port <= 0 {
+		log.Fatalf("Invalid port: %d", port)
+	}
+	s.router.Run(fmt.Sprintf(":%d", port))
 }

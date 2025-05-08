@@ -13,6 +13,6 @@ func init() {
 }
 
 func main() {
-	router := server.InitServer()
-	server.StartServer(router)
+	noteServer := server.NewServer()
+	noteServer.Start(9100)
 }
