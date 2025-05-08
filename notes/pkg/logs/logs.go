@@ -1,9 +1,9 @@
 package logs
 
 import (
+	"github.com/luntsev/notes-manager/notes/configs"
+	"github.com/luntsev/notes-manager/notes/pkg/enum"
 	"log"
-	"notes-manager/configs"
-	"notes-manager/pkg/enum"
 )
 
 type Logger struct {

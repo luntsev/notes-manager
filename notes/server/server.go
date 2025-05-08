@@ -2,11 +2,11 @@ package server
 
 import (
 	"fmt"
+	"github.com/luntsev/notes-manager/notes/configs"
+	"github.com/luntsev/notes-manager/notes/pkg/database"
+	"github.com/luntsev/notes-manager/notes/pkg/logs"
+	"github.com/luntsev/notes-manager/notes/repository"
 	"log"
-	"notes-manager/configs"
-	"notes-manager/pkg/database"
-	"notes-manager/pkg/logs"
-	"notes-manager/repository"
 
 	"github.com/gin-gonic/gin"
 )

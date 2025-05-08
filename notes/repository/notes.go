@@ -4,17 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/luntsev/notes-manager/notes/configs"
+	"github.com/luntsev/notes-manager/notes/models"
+	"github.com/luntsev/notes-manager/notes/pkg/database"
+	"github.com/luntsev/notes-manager/notes/pkg/logs"
 	"go.mongodb.org/mongo-driver/bson"
-	"notes-manager/configs"
-	"notes-manager/models"
-	"notes-manager/pkg/database"
-	"notes-manager/pkg/logs"
 )
 
 type NotesRepository struct {
 	db     *database.MongoDB
 	cache  *database.RedisDB
-	conf   *configs.Config
+	dbName string
 	logger *logs.Logger
 }
 
@@ -22,13 +22,13 @@ func NewNotesRepository(config *configs.Config, mongoDB *database.MongoDB, redis
 	return &NotesRepository{
 		db:     mongoDB,
 		cache:  redisDB,
-		conf:   config,
+		dbName: config.MongoDataBase.MongoDbName,
 		logger: logs,
 	}
 }
 
 func (repo *NotesRepository) Create(note *models.Note, ctx context.Context) (any, error) {
-	collection := repo.db.Db.Database(repo.conf.MongoDataBase.MongoDbName).Collection(fmt.Sprintf("notes/%d", note.AuthorId))
+	collection := repo.db.Db.Database(repo.dbName).Collection(fmt.Sprintf("notes/%d", note.AuthorId))
 
 	result, err := collection.InsertOne(ctx, note)
 	if err != nil {
@@ -42,7 +42,7 @@ func (repo *NotesRepository) Create(note *models.Note, ctx context.Context) (any
 }
 
 func (repo *NotesRepository) Read(id string, authorId uint, ctx context.Context) (*models.Note, error) {
-	collection := repo.db.Db.Database(repo.conf.MongoDataBase.MongoDbName).Collection(fmt.Sprintf("notes/%d", authorId))
+	collection := repo.db.Db.Database(repo.dbName).Collection(fmt.Sprintf("notes/%d", authorId))
 
 	var note models.Note
 	filter := bson.M{"id": id}
@@ -56,7 +56,7 @@ func (repo *NotesRepository) Read(id string, authorId uint, ctx context.Context)
 }
 
 func (repo *NotesRepository) Update(note *models.Note, ctx context.Context) error {
-	collection := repo.db.Db.Database(repo.conf.MongoDataBase.MongoDbName).Collection(fmt.Sprintf("notes/%d", note.AuthorId))
+	collection := repo.db.Db.Database(repo.dbName).Collection(fmt.Sprintf("notes/%d", note.AuthorId))
 
 	updateFilds := bson.M{}
 	if note.Name != nil {
@@ -85,7 +85,7 @@ func (repo *NotesRepository) Update(note *models.Note, ctx context.Context) erro
 }
 
 func (repo *NotesRepository) Delete(id string, authorId uint, ctx context.Context) (int64, error) {
-	collection := repo.db.Db.Database(repo.conf.MongoDataBase.MongoDbName).Collection(fmt.Sprintf("notes/%d", authorId))
+	collection := repo.db.Db.Database(repo.dbName).Collection(fmt.Sprintf("notes/%d", authorId))
 
 	filter := bson.M{"id": id}
 
@@ -108,7 +108,7 @@ func (repo *NotesRepository) Delete(id string, authorId uint, ctx context.Contex
 func (repo *NotesRepository) List(authorId uint, ctx context.Context) (*[]models.Note, error) {
 	notes, err := repo.cache.ReadFromCache(authorId)
 	if err != nil {
-		collection := repo.db.Db.Database(repo.conf.MongoDataBase.MongoDbName).Collection(fmt.Sprintf("notes/%d", authorId))
+		collection := repo.db.Db.Database(repo.dbName).Collection(fmt.Sprintf("notes/%d", authorId))
 
 		cursor, err := collection.Find(ctx, bson.M{})
 		if err != nil {

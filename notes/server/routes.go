@@ -1,9 +1,9 @@
 package server
 
 import (
-	"notes-manager/handlers"
-	"notes-manager/pkg/logs"
-	"notes-manager/repository"
+	"github.com/luntsev/notes-manager/notes/handlers"
+	"github.com/luntsev/notes-manager/notes/pkg/logs"
+	"github.com/luntsev/notes-manager/notes/repository"
 
 	"github.com/gin-gonic/gin"
 )

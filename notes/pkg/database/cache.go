@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"notes-manager/configs"
-	"notes-manager/models"
-	"notes-manager/pkg/logs"
+	"github.com/luntsev/notes-manager/notes/configs"
+	"github.com/luntsev/notes-manager/notes/models"
+	"github.com/luntsev/notes-manager/notes/pkg/logs"
 	"time"
 
 	"github.com/go-redis/redis"

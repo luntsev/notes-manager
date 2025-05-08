@@ -3,11 +3,11 @@ package database
 import (
 	"context"
 	"fmt"
+	"github.com/luntsev/notes-manager/notes/configs"
+	"github.com/luntsev/notes-manager/notes/pkg/logs"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"notes-manager/configs"
-	"notes-manager/pkg/logs"
 	"time"
 )
 

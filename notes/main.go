@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/joho/godotenv"
+	"github.com/luntsev/notes-manager/notes/server"
 	"log"
-	"notes-manager/server"
 )
 
 func init() {

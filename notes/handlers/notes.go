@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/luntsev/notes-manager/notes/models"
+	"github.com/luntsev/notes-manager/notes/pkg/logs"
+	"github.com/luntsev/notes-manager/notes/repository"
 	"net/http"
-	"notes-manager/models"
-	"notes-manager/pkg/logs"
-	"notes-manager/repository"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

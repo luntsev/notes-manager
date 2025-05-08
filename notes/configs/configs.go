@@ -2,7 +2,7 @@ package configs
 
 import (
 	"errors"
-	"notes-manager/pkg/enum"
+	"github.com/luntsev/notes-manager/notes/pkg/enum"
 	"os"
 )
 
