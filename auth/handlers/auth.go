@@ -6,33 +6,36 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/luntsev/notes-manager/auth/models"
+	"github.com/luntsev/notes-manager/auth/pkg/jwt"
 	"github.com/luntsev/notes-manager/auth/repository"
 	"github.com/luntsev/notes-manager/notes/pkg/logs"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type authHandler struct {
-	repo   *repository.AuthRepositury
-	logger *logs.Logger
+	repo    *repository.AuthRepository
+	logger  *logs.Logger
+	jwtServ *jwt.JWT
 }
 
-func NewAuthHandler(repository *repository.AuthRepositury, logger *logs.Logger) *authHandler {
+func NewAuthHandler(repository *repository.AuthRepository, logger *logs.Logger, jwt *jwt.JWT) *authHandler {
 	return &authHandler{
-		repo:   repository,
-		logger: logger,
+		repo:    repository,
+		logger:  logger,
+		jwtServ: jwt,
 	}
 }
 
 func (h *authHandler) Register(ctx *gin.Context) {
-	var registerData models.RegisterData
+	var regData models.RegisterData
 
-	if err := ctx.ShouldBindJSON(&registerData); err != nil {
+	if err := ctx.ShouldBindJSON(&regData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Некорректные данные регистрации"})
 		h.logger.WriteWarn("Wrong register data in request")
 		return
 	}
 
-	hashedPass, err := bcrypt.GenerateFromPassword([]byte(registerData.Password), 10)
+	hashedPass, err := bcrypt.GenerateFromPassword([]byte(regData.Password), 10)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось хешировать пароль"})
 		h.logger.WriteError(fmt.Sprintf("Unable hashing password: %s", err.Error()))
@@ -40,7 +43,7 @@ func (h *authHandler) Register(ctx *gin.Context) {
 	}
 
 	user := &models.User{
-		Email:    registerData.Email,
+		Email:    regData.Email,
 		PassHash: string(hashedPass),
 	}
 
@@ -53,7 +56,33 @@ func (h *authHandler) Register(ctx *gin.Context) {
 }
 
 func (h *authHandler) Login(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{"message": "Пользователь авторизован"})
+	var regData models.RegisterData
+
+	if err := ctx.ShouldBindJSON(&regData); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Некорректные данные авторизации"})
+		h.logger.WriteWarn("Wrong login data in request")
+		return
+	}
+
+	user, err := h.repo.GetByEmail(regData.Email)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Некорректный email или пароль"})
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PassHash), []byte(regData.Password)); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Некорректный email или пароль"})
+		h.logger.WriteInfo(fmt.Sprintf("Wrong password for account: %s, fromt IP: %s", regData.Email, ctx.ClientIP()))
+		return
+	}
+
+	tokens, err := h.jwtServ.Create(&jwt.JWTData{Email: regData.Email})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Unable create tokens"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, tokens)
 }
 
 func (h *authHandler) GetUser(ctx *gin.Context) {

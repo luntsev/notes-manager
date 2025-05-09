@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/luntsev/notes-manager/auth/configs"
 	"github.com/luntsev/notes-manager/auth/pkg/database"
+	"github.com/luntsev/notes-manager/auth/pkg/jwt"
 	"github.com/luntsev/notes-manager/auth/repository"
 	"github.com/luntsev/notes-manager/notes/pkg/logs"
 )
@@ -21,12 +22,13 @@ func NewServer() *authServer {
 		panic(err)
 	}
 
+	jwtServ := jwt.NewJWT(conf.Jwt.JwtSecret)
 	logger := logs.NewLogger(conf.LogLevel)
 
 	db := database.NewPostgresDB(conf, logger)
 	repo := repository.NewAuthRepository(db, logger)
 
-	router := NewAuthRouter(repo, logger)
+	router := NewAuthRouter(repo, logger, jwtServ)
 
 	return &authServer{
 		router: router.router,

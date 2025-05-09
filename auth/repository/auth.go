@@ -8,19 +8,19 @@ import (
 	"github.com/luntsev/notes-manager/notes/pkg/logs"
 )
 
-type AuthRepositury struct {
+type AuthRepository struct {
 	DataBase *database.PostgresDB
 	logger   *logs.Logger
 }
 
-func NewAuthRepository(db *database.PostgresDB, logger *logs.Logger) *AuthRepositury {
-	return &AuthRepositury{
+func NewAuthRepository(db *database.PostgresDB, logger *logs.Logger) *AuthRepository {
+	return &AuthRepository{
 		DataBase: db,
 		logger:   logger,
 	}
 }
 
-func (repo *AuthRepositury) Create(user *models.User) error {
+func (repo *AuthRepository) Create(user *models.User) error {
 	result := repo.DataBase.Create(user)
 	if result.Error != nil {
 		repo.logger.WriteError(fmt.Sprintf("Unable create user record: %s", result.Error.Error()))
@@ -28,4 +28,16 @@ func (repo *AuthRepositury) Create(user *models.User) error {
 		repo.logger.WriteInfo("User record is created")
 	}
 	return result.Error
+}
+
+func (repo *AuthRepository) GetByEmail(email string) (*models.User, error) {
+	var user models.User
+
+	result := repo.DataBase.First(&user, "email = ?", email)
+	if result.Error != nil {
+		repo.logger.WriteWarn(fmt.Sprintf("Unable read user record in database: %s", result.Error.Error()))
+		return nil, result.Error
+	}
+
+	return &user, nil
 }

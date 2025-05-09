@@ -7,3 +7,8 @@ type User struct {
 	Email    string `gorm:"not null;unique"`
 	PassHash string `gorm:"columt:pass_hash" json:"-"`
 }
+
+type Tokens struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+}
