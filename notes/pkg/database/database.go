@@ -30,6 +30,7 @@ func NewMongoDB(conf *configs.Config, logger *logs.Logger) *MongoDB {
 
 	mongo, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
 	if err != nil {
+		logger.WriteError(fmt.Sprintf("Unable connect to database: %s", err.Error()))
 		panic(err)
 	}
 

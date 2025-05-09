@@ -4,8 +4,10 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/luntsev/notes-manager/auth/configs"
+	"github.com/luntsev/notes-manager/auth/pkg/database"
+	"github.com/luntsev/notes-manager/auth/repository"
 	"github.com/luntsev/notes-manager/notes/pkg/logs"
-	"github.com/notes-manager/auth/configs"
 )
 
 type authServer struct {
@@ -21,7 +23,10 @@ func NewServer() *authServer {
 
 	logger := logs.NewLogger(conf.LogLevel)
 
-	router := NewAuthRouter()
+	db := database.NewPostgresDB(conf, logger)
+	repo := repository.NewAuthRepository(db.Db, *logger)
+
+	router := NewAuthRouter(repo, logger)
 
 	return &authServer{
 		router: router.router,

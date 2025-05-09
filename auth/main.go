@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/joho/godotenv"
-	"github.com/notes-manager/auth/server"
+	"github.com/luntsev/notes-manager/auth/server"
 )
 
 func init() {
