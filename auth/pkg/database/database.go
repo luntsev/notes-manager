@@ -10,7 +10,7 @@ import (
 )
 
 type PostgresDB struct {
-	Db     *gorm.DB
+	*gorm.DB
 	logger logs.Logger
 }
 
@@ -31,7 +31,7 @@ func NewPostgresDB(conf *configs.Config, logger *logs.Logger) *PostgresDB {
 
 	logger.WriteInfo("Successful connection to the database")
 	return &PostgresDB{
-		Db:     db,
+		DB:     db,
 		logger: *logger,
 	}
 }

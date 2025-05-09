@@ -24,7 +24,7 @@ func NewServer() *authServer {
 	logger := logs.NewLogger(conf.LogLevel)
 
 	db := database.NewPostgresDB(conf, logger)
-	repo := repository.NewAuthRepository(db.Db, *logger)
+	repo := repository.NewAuthRepository(db, logger)
 
 	router := NewAuthRouter(repo, logger)
 

@@ -25,6 +25,6 @@ func main() {
 	logger := logs.NewLogger(conf.LogLevel)
 
 	db := database.NewPostgresDB(conf, logger)
-	db.Db.AutoMigrate(&models.User{})
+	db.DB.AutoMigrate(&models.User{})
 
 }
