@@ -5,11 +5,10 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/luntsev/notes-manager/auth/configs"
 	"github.com/luntsev/notes-manager/auth/pkg/jwt"
 )
 
-func IsAuth(conf *configs.JwtConfig) gin.HandlerFunc {
+func IsAuth(jwtServ *jwt.JWT) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authStr := ctx.GetHeader("Authorization")
 		if !strings.HasPrefix(authStr, "Bearer ") {
@@ -20,7 +19,6 @@ func IsAuth(conf *configs.JwtConfig) gin.HandlerFunc {
 
 		tokenStr := strings.TrimPrefix(authStr, "Bearer ")
 
-		jwtServ := jwt.NewJWT(conf.JwtSecret, conf.AccessTokerExpire, conf.RefreshTokenExpire)
 		data, err := jwtServ.Verify(tokenStr)
 		if err != nil {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})

@@ -7,7 +7,6 @@ import (
 	"github.com/luntsev/notes-manager/auth/configs"
 	"github.com/luntsev/notes-manager/auth/pkg/database"
 	"github.com/luntsev/notes-manager/auth/pkg/jwt"
-	"github.com/luntsev/notes-manager/auth/pkg/middleware"
 	"github.com/luntsev/notes-manager/auth/repository"
 	"github.com/luntsev/notes-manager/notes/pkg/logs"
 )
@@ -30,7 +29,6 @@ func NewServer() *authServer {
 	repo := repository.NewAuthRepository(db, logger)
 
 	router := NewAuthRouter(repo, logger, jwtServ)
-	router.router.Use(middleware.IsAuth(&conf.Jwt))
 
 	return &authServer{
 		router: router.router,
