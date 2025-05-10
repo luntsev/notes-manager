@@ -27,7 +27,7 @@ func NewAuthHandler(repository *repository.AuthRepository, logger *logs.Logger, 
 }
 
 func (h *authHandler) Register(ctx *gin.Context) {
-	var regData models.RegisterData
+	var regData models.RegisterRequest
 
 	if err := ctx.ShouldBindJSON(&regData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Некорректные данные регистрации"})
@@ -44,7 +44,9 @@ func (h *authHandler) Register(ctx *gin.Context) {
 
 	user := &models.User{
 		Email:    regData.Email,
+		Name:     regData.Name,
 		PassHash: string(hashedPass),
+		BirthDay: regData.BirthDay.Time,
 	}
 
 	if err := h.repo.Create(user); err != nil {
@@ -56,7 +58,7 @@ func (h *authHandler) Register(ctx *gin.Context) {
 }
 
 func (h *authHandler) Login(ctx *gin.Context) {
-	var regData models.RegisterData
+	var regData models.LoginRequest
 
 	if err := ctx.ShouldBindJSON(&regData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Некорректные данные авторизации"})
@@ -86,7 +88,19 @@ func (h *authHandler) Login(ctx *gin.Context) {
 }
 
 func (h *authHandler) GetUser(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{"message": "Информация о пользователе получена"})
+	email := ctx.GetString("email")
+	if email == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Авторизация не выполнена"})
+		return
+	}
+
+	user, err := h.repo.GetByEmail(email)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Пользователь не найден"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": user})
 }
 
 func (h *authHandler) RefreshToken(ctx *gin.Context) {

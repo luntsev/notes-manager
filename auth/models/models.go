@@ -1,14 +1,15 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type User struct {
 	gorm.Model
-	Email    string `gorm:"not null;unique"`
-	PassHash string `gorm:"columt:pass_hash" json:"-"`
-}
-
-type Tokens struct {
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
+	Email    string    `gorm:"not null;unique"`
+	Name     string    `gorm:"not null"`
+	BirthDay time.Time `gorm:"column:birth_day;type:date"`
+	PassHash string    `gorm:"columt:pass_hash" json:"-"`
 }
