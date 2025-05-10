@@ -2,11 +2,10 @@ package jwt
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
-	"fmt"
-
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/luntsev/notes-manager/notes/pkg/logs"
 )
 
@@ -20,25 +19,29 @@ type tokens struct {
 }
 
 type JWT struct {
-	Secret string
-	logger *logs.Logger
+	Secret             string
+	accessTokenExpire  time.Duration
+	refreshTokenExpire time.Duration
+	logger             *logs.Logger
 }
 
-func NewJWT(secret string) *JWT {
+func NewJWT(secret string, accessExp, refreshExp int) *JWT {
 	return &JWT{
-		Secret: secret,
+		Secret:             secret,
+		accessTokenExpire:  time.Duration(accessExp) * time.Second,
+		refreshTokenExpire: time.Duration(refreshExp) * time.Second,
 	}
 }
 
 func (j *JWT) Create(data *JWTData) (*tokens, error) {
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": data.Email,
-		"exp":   time.Now().Add(time.Hour * 1).Unix(),
+		"exp":   time.Now().Add(j.accessTokenExpire).Unix(),
 	})
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": data.Email,
-		"exp":   time.Now().Add(time.Hour * 1).Unix(),
+		"exp":   time.Now().Add(j.refreshTokenExpire).Unix(),
 	})
 
 	signedAccessToken, err := accessToken.SignedString([]byte(j.Secret))
@@ -64,8 +67,8 @@ func (j *JWT) Create(data *JWTData) (*tokens, error) {
 func (j *JWT) Verify(tokenStr string) (*JWTData, error) {
 	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			j.logger.WriteError("Wrong token signing method")
-			return nil, errors.New("wrong token signing method")
+			j.logger.WriteError("Wrong jwt-token signing method")
+			return nil, errors.New("wrong jwt-token signing method")
 		}
 		return []byte(j.Secret), nil
 	})
@@ -74,7 +77,7 @@ func (j *JWT) Verify(tokenStr string) (*JWTData, error) {
 	}
 
 	if !token.Valid {
-		j.logger.WriteWarn("Шnvalid token")
+		j.logger.WriteWarn("Invalid token")
 		return nil, errors.New("invalid token")
 	}
 

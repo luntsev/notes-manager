@@ -2,10 +2,9 @@ package configs
 
 import (
 	"errors"
+	"github.com/luntsev/notes-manager/notes/pkg/enum"
 	"os"
 	"strconv"
-
-	"github.com/luntsev/notes-manager/notes/pkg/enum"
 )
 
 type Config struct {
@@ -25,7 +24,9 @@ type DbConfig struct {
 }
 
 type JwtConfig struct {
-	JwtSecret string
+	JwtSecret          string
+	AccessTokerExpire  int
+	RefreshTokenExpire int
 }
 
 func LoadConfig() (*Config, error) {
@@ -43,11 +44,28 @@ func LoadConfig() (*Config, error) {
 		},
 	}
 
+	accessTokenExpire, err := strconv.Atoi(os.Getenv("ACCESS_TOKEN_EXPIRE"))
+	if err != nil {
+		return nil, err
+	} else if accessTokenExpire <= 0 {
+		return nil, errors.New("bad ACCESS_TOKEN_EXPIRE in envarenment variable")
+	}
+
+	refreshTokenExpire, err := strconv.Atoi(os.Getenv("REFRESH_TOKEN_EXPIRE"))
+	if err != nil {
+		return nil, err
+	} else if refreshTokenExpire <= 0 {
+		return nil, errors.New("bad REFRESH_TOKEN_EXPIRE in envarenment variable")
+	}
+
+	conf.Jwt.AccessTokerExpire = accessTokenExpire
+	conf.Jwt.RefreshTokenExpire = refreshTokenExpire
+
 	port, err := strconv.Atoi(os.Getenv("AUTH_PORT"))
 	if err != nil {
 		return nil, err
 	} else if port <= 0 {
-		return nil, errors.New("bad port in envarenment variable")
+		return nil, errors.New("bad value in AUTH_PORT envarenment variable")
 	}
 	conf.Port = port
 
