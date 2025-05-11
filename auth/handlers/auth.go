@@ -80,7 +80,7 @@ func (h *authHandler) Login(ctx *gin.Context) {
 
 	tokens, err := h.jwtServ.Create(&jwt.JWTData{Email: regData.Email})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Unable create tokens"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Неудалось создать токены"})
 		return
 	}
 
@@ -104,7 +104,27 @@ func (h *authHandler) GetUser(ctx *gin.Context) {
 }
 
 func (h *authHandler) RefreshToken(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{"message": "Токен обновлен"})
+	var refreshToken models.RefreshTokenRequest
+
+	if err := ctx.ShouldBindJSON(&refreshToken); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Некорректные данные обновления токена"})
+		return
+	}
+
+	jwdData, err := h.jwtServ.Verify(refreshToken.RefreshToken)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": fmt.Sprintf("Ошибка при проверке токена обновления: %s", err.Error())})
+		return
+	}
+
+	tokens, err := h.jwtServ.Create(jwdData)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Неудалось создать токены"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, tokens)
 }
 
 func (h *authHandler) Update(ctx *gin.Context) {

@@ -32,6 +32,10 @@ type RegisterRequest struct {
 	BirthDay birthdayDate `json:"birthDay,format:2006.01.02" binding:"required"`
 }
 
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refreshToken" binding:"required"`
+}
+
 type TokensResponse struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`

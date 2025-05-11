@@ -21,7 +21,7 @@ func NewAuthRouter(repo *repository.AuthRepository, logger *logs.Logger, jwtServ
 
 	router.POST("/auth/register", handler.Register)
 	router.POST("/auth/login", handler.Login)
-	router.PUT("/auth/update", handler.Update)
+	router.PUT("/auth/update", middleware.IsAuth(jwtServ), handler.Update)
 	router.GET("/auth", middleware.IsAuth(jwtServ), handler.GetUser)
 	router.POST("/auth/refresh", handler.RefreshToken)
 
