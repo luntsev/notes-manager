@@ -128,5 +128,12 @@ func (h *authHandler) RefreshToken(ctx *gin.Context) {
 }
 
 func (h *authHandler) Update(ctx *gin.Context) {
+	var updateData models.UpdateRequest
+
+	if err := ctx.ShouldBindJSON(&updateData); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Некорректные данные обновления учетной записи"})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{"message": "Пользователь обновлен"})
 }

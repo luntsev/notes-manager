@@ -40,3 +40,9 @@ type TokensResponse struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
 }
+
+type UpdateRequest struct {
+	Name     string       `json:"name"`
+	Password string       `json:"password"`
+	BirthDay birthdayDate `json:"birthDay"`
+}
