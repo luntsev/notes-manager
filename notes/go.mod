@@ -7,7 +7,7 @@ require (
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
-	github.com/luntsev/notes-manager/auth v0.0.0-20250512084912-153a434ffa61
+	github.com/luntsev/notes-manager/auth v0.0.0-20250512122301-6a594e5bc1ea
 	go.mongodb.org/mongo-driver v1.17.3
 )
 

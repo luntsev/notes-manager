@@ -96,11 +96,12 @@ func (j *JWT) Verify(tokenStr string) (*JWTData, error) {
 		return nil, errors.New("no email in token")
 	}
 
-	id, ok := claims["id"].(uint)
-	if !ok || id == 0 {
+	idFloat, ok := claims["id"].(float64)
+	if !ok || idFloat == 0 {
 		j.logger.WriteError("No ID in token")
 		return nil, errors.New("no id in token")
 	}
+	id := uint(idFloat)
 
 	return &JWTData{
 		Email: email,
