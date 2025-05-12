@@ -2,6 +2,8 @@ package server
 
 import (
 	"fmt"
+
+	"github.com/luntsev/notes-manager/auth/pkg/jwt"
 	"github.com/luntsev/notes-manager/notes/configs"
 	"github.com/luntsev/notes-manager/notes/pkg/database"
 	"github.com/luntsev/notes-manager/notes/pkg/logs"
@@ -31,7 +33,9 @@ func NewServer() *Server {
 
 	notesRepo := repository.NewNotesRepository(conf, notesDb, cache, logger)
 
-	noteRouter := NewRouter(notesRepo, logger)
+	jwtServ := jwt.NewJWT(conf.Jwt.JwtSecret, conf.Jwt.AccessTokerExpire, conf.Jwt.RefreshTokenExpire)
+
+	noteRouter := NewRouter(notesRepo, logger, jwtServ)
 	return &Server{
 		router: noteRouter.router,
 		port:   conf.Port,

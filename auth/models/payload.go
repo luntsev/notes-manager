@@ -43,6 +43,6 @@ type TokensResponse struct {
 
 type UpdateRequest struct {
 	Name     *string       `json:"name,omitempty"`
-	Password *string       `json:"password,omitempty"`
+	Password *string       `json:"password,omitempty" binding:"min=8`
 	BirthDay *birthdayDate `json:"birthDay,omitempty"`
 }

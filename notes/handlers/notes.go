@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/luntsev/notes-manager/auth/pkg/jwt"
 	"github.com/luntsev/notes-manager/notes/models"
 	"github.com/luntsev/notes-manager/notes/pkg/logs"
 	"github.com/luntsev/notes-manager/notes/repository"
@@ -12,14 +13,16 @@ import (
 )
 
 type notesHandler struct {
-	repo   *repository.NotesRepository
-	logger *logs.Logger
+	repo    *repository.NotesRepository
+	logger  *logs.Logger
+	jwtServ *jwt.JWT
 }
 
-func NewNotesHandler(notesRepo *repository.NotesRepository, logs *logs.Logger) *notesHandler {
+func NewNotesHandler(notesRepo *repository.NotesRepository, logs *logs.Logger, jwt *jwt.JWT) *notesHandler {
 	return &notesHandler{
-		repo:   notesRepo,
-		logger: logs,
+		repo:    notesRepo,
+		logger:  logs,
+		jwtServ: jwt,
 	}
 }
 
