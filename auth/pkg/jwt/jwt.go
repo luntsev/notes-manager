@@ -11,6 +11,7 @@ import (
 
 type JWTData struct {
 	Email string
+	Id    uint
 }
 
 type tokens struct {
@@ -36,11 +37,13 @@ func NewJWT(secret string, accessExp, refreshExp int) *JWT {
 func (j *JWT) Create(data *JWTData) (*tokens, error) {
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": data.Email,
+		"id":    data.Id,
 		"exp":   time.Now().Add(j.accessTokenExpire).Unix(),
 	})
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": data.Email,
+		"id":    data.Id,
 		"exp":   time.Now().Add(j.refreshTokenExpire).Unix(),
 	})
 
@@ -93,5 +96,13 @@ func (j *JWT) Verify(tokenStr string) (*JWTData, error) {
 		return nil, errors.New("no email in token")
 	}
 
-	return &JWTData{Email: email}, nil
+	id, ok := claims["id"].(uint)
+	if !ok || id == 0 {
+		j.logger.WriteError("No ID in token")
+		return nil, errors.New("no id in token")
+	}
+
+	return &JWTData{
+		Email: email,
+		Id:    id}, nil
 }

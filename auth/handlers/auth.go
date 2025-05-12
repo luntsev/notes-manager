@@ -49,7 +49,7 @@ func (h *authHandler) Register(ctx *gin.Context) {
 	}
 
 	if err := h.repo.Create(user); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалосб создать пользователя"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось создать пользователя"})
 		h.logger.WriteError(fmt.Sprintf("Unable write user record: %s", err.Error()))
 	}
 
@@ -77,7 +77,7 @@ func (h *authHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	tokens, err := h.jwtServ.Create(&jwt.JWTData{Email: regData.Email})
+	tokens, err := h.jwtServ.Create(&jwt.JWTData{Email: user.Email, Id: user.ID})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Неудалось создать токены"})
 		return

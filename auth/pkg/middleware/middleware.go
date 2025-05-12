@@ -26,6 +26,7 @@ func IsAuth(jwtServ *jwt.JWT) gin.HandlerFunc {
 			return
 		}
 		ctx.Set("email", data.Email)
+		ctx.Set("id", data.Id)
 		ctx.Next()
 	}
 }

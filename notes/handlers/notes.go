@@ -36,7 +36,7 @@ func (h *notesHandler) Create(ctx *gin.Context) {
 	}
 
 	note.Id = uuid.NewString()
-	note.AuthorId = 1
+	note.AuthorId = ctx.GetUint("id")
 
 	result, err := h.repo.Create(&note, ctx.Request.Context())
 	if err != nil {
@@ -53,7 +53,7 @@ func (h *notesHandler) Create(ctx *gin.Context) {
 // Получение заметки по ID
 func (h *notesHandler) Get(ctx *gin.Context) {
 	id := ctx.Param("id")
-	var authorId uint = 1
+	authorId := ctx.GetUint("id")
 
 	note, err := h.repo.Read(id, authorId, ctx.Request.Context())
 	if err != nil {
@@ -73,7 +73,7 @@ func (h *notesHandler) Update(ctx *gin.Context) {
 		return
 	}
 
-	note.AuthorId = 1
+	note.AuthorId = ctx.GetUint("id")
 	note.Id = ctx.Param("id")
 	err := h.repo.Update(&note, ctx.Request.Context())
 	if err != nil {
@@ -87,7 +87,7 @@ func (h *notesHandler) Update(ctx *gin.Context) {
 // Удаление заметки по ID
 func (h *notesHandler) Delete(ctx *gin.Context) {
 	id := ctx.Param("id")
-	var authorId uint = 1
+	authorId := ctx.GetUint("id")
 
 	delCount, err := h.repo.Delete(id, authorId, ctx.Request.Context())
 	if err != nil {
@@ -105,7 +105,7 @@ func (h *notesHandler) Delete(ctx *gin.Context) {
 
 // Получение списка всех заметок
 func (h *notesHandler) GetList(ctx *gin.Context) {
-	var authorId uint = 1
+	authorId := ctx.GetUint("1")
 
 	notes, err := h.repo.List(authorId, ctx.Request.Context())
 	if err != nil {
