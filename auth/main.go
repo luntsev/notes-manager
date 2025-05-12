@@ -14,6 +14,6 @@ func init() {
 }
 
 func main() {
-	noteServer := server.NewServer()
-	noteServer.Start()
+	authServer := server.NewServer()
+	authServer.Start()
 }

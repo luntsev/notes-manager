@@ -42,7 +42,7 @@ type TokensResponse struct {
 }
 
 type UpdateRequest struct {
-	Name     string       `json:"name"`
-	Password string       `json:"password"`
-	BirthDay birthdayDate `json:"birthDay"`
+	Name     *string       `json:"name,omitempty"`
+	Password *string       `json:"password,omitempty"`
+	BirthDay *birthdayDate `json:"birthDay,omitempty"`
 }

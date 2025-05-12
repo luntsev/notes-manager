@@ -2,14 +2,13 @@ package handlers
 
 import (
 	"fmt"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/luntsev/notes-manager/auth/models"
 	"github.com/luntsev/notes-manager/auth/pkg/jwt"
 	"github.com/luntsev/notes-manager/auth/repository"
 	"github.com/luntsev/notes-manager/notes/pkg/logs"
 	"golang.org/x/crypto/bcrypt"
+	"net/http"
 )
 
 type authHandler struct {
@@ -132,6 +131,38 @@ func (h *authHandler) Update(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&updateData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Некорректные данные обновления учетной записи"})
+		return
+	}
+
+	email := ctx.GetString("email")
+	user, err := h.repo.GetByEmail(email)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Учетная запись пользователя не найдена"})
+		h.logger.WriteError(fmt.Sprintf("unable find user account: %s", err.Error()))
+		return
+	}
+
+	if updateData.Name != nil {
+		user.Name = *updateData.Name
+	}
+
+	if updateData.Password != nil {
+		hashedPass, err := bcrypt.GenerateFromPassword([]byte(*updateData.Password), 10)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось хешировать пароль"})
+			h.logger.WriteError(fmt.Sprintf("Unable hashing password: %s", err.Error()))
+			return
+		}
+		user.PassHash = string(hashedPass)
+	}
+
+	if updateData.BirthDay != nil {
+		user.BirthDay = updateData.BirthDay.Time
+	}
+
+	err = h.repo.Update(user)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалосьобновить аккаунт пользователя"})
 		return
 	}
 

@@ -6,6 +6,7 @@ import (
 	"github.com/luntsev/notes-manager/auth/models"
 	"github.com/luntsev/notes-manager/auth/pkg/database"
 	"github.com/luntsev/notes-manager/notes/pkg/logs"
+	"gorm.io/gorm/clause"
 )
 
 type AuthRepository struct {
@@ -40,4 +41,13 @@ func (repo *AuthRepository) GetByEmail(email string) (*models.User, error) {
 	}
 
 	return &user, nil
+}
+
+func (repo *AuthRepository) Update(user *models.User) error {
+	result := repo.DataBase.Clauses(clause.Returning{}).Updates(user)
+	if result.Error != nil {
+		repo.logger.WriteWarn(fmt.Sprintf("Unable update user record in database: %s", result.Error.Error()))
+	}
+
+	return result.Error
 }
