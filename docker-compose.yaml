@@ -51,8 +51,8 @@ services:
       - redis_notes
     networks:
       - notes-manager
-    ports:
-      - ${NOTES_PORT}:${NOTES_PORT}
+#    ports:
+#      - ${NOTES_PORT}:${NOTES_PORT}
     environment:
       NOTES_PORT: ${NOTES_PORT}
       JWT_SECRET: ${JWT_SECRET}
@@ -109,8 +109,8 @@ services:
     networks:
       - notes-manager
     # Порты, которые будут использоваться в контейнере
-    ports:
-      - ${AUTH_PORT}:${AUTH_PORT}
+#    ports:
+#      - ${AUTH_PORT}:${AUTH_PORT}
     # Внешние переменные окружения
     environment:
       # Порт который будет использоваться в контейнере
@@ -129,6 +129,20 @@ services:
       POSTGRES_USE_SSL: ${POSTGRES_USE_SSL}
       # Уровинь логирования
       LOG_LEVEL: ${LOG_LEVEL}
+  
+  nginx:
+    restart: on-failure
+    container_name: nginx
+    image: nginx:1.25.4-alpine
+    networks:
+      - notes-manager
+    ports:
+      - ${NGINX_PORT}:${NGINX_PORT}
+    depends_on:
+      - auth
+      - notes
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
 
 # Конфигурация для хранилища данных
 volumes:

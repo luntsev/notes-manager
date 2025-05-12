@@ -19,11 +19,11 @@ func NewRouter(repo *repository.NotesRepository, logger *logs.Logger, jwtServ *j
 
 	router := gin.Default()
 
-	router.POST("/note", middleware.IsAuth(jwtServ), handlers.Create)       // Создание заметки
-	router.GET("/note/:id", middleware.IsAuth(jwtServ), handlers.Get)       // Получение заметки
-	router.PUT("/note/:id", middleware.IsAuth(jwtServ), handlers.Update)    // Изменение заметки
-	router.DELETE("/note/:id", middleware.IsAuth(jwtServ), handlers.Delete) // Удаление заметки
-	router.GET("/notes", middleware.IsAuth(jwtServ), handlers.GetList)      // Получение списка заметок
+	router.POST("/", middleware.IsAuth(jwtServ), handlers.Create)      // Создание заметки
+	router.GET("/:id", middleware.IsAuth(jwtServ), handlers.Get)       // Получение заметки
+	router.PUT("/:id", middleware.IsAuth(jwtServ), handlers.Update)    // Изменение заметки
+	router.DELETE("/:id", middleware.IsAuth(jwtServ), handlers.Delete) // Удаление заметки
+	router.GET("/list", middleware.IsAuth(jwtServ), handlers.GetList)  // Получение списка заметок
 
 	return &notesRouter{router: router}
 }

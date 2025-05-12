@@ -19,11 +19,11 @@ func NewAuthRouter(repo *repository.AuthRepository, logger *logs.Logger, jwtServ
 
 	handler := handlers.NewAuthHandler(repo, logger, jwtServ)
 
-	router.POST("/auth/register", handler.Register)
-	router.POST("/auth/login", handler.Login)
-	router.PUT("/auth/update", middleware.IsAuth(jwtServ), handler.Update)
-	router.GET("/auth", middleware.IsAuth(jwtServ), handler.GetUser)
-	router.POST("/auth/refresh", handler.RefreshToken)
+	router.POST("/register", handler.Register)
+	router.POST("/login", handler.Login)
+	router.PUT("/update", middleware.IsAuth(jwtServ), handler.Update)
+	router.GET("/", middleware.IsAuth(jwtServ), handler.GetUser)
+	router.POST("/refresh", handler.RefreshToken)
 
 	return &authRouter{router: router}
 }

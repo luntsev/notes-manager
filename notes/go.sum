@@ -63,10 +63,8 @@ github.com/klauspost/cpuid/v2 v2.2.7/go.mod h1:Lcz8mBdAVJIBVzewtcLocK12l3Y+JytZY
 github.com/knz/go-libedit v1.10.1/go.mod h1:MZTVkCWyz0oBc7JOWP3wNAzd002ZbM/5hgShxwh4x8M=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
 github.com/leodido/go-urn v1.4.0/go.mod h1:bvxc+MVxLKB4z00jd1z+Dvzr47oO32F/QSNjSBOlFxI=
-github.com/luntsev/notes-manager/auth v0.0.0-20250512084912-153a434ffa61 h1:MTt+M1ZBQ3oXm8QJys3npkvd+qhFMApor4RR5EmTNiw=
-github.com/luntsev/notes-manager/auth v0.0.0-20250512084912-153a434ffa61/go.mod h1:1QJ374otTk4Deez/R9jvJSvHxztEBf7kVo2+WtZ7kXA=
-github.com/luntsev/notes-manager/auth v0.0.0-20250512122301-6a594e5bc1ea h1:EBxmNvNLWre9wWkxPxpVr8mmGckJUMJgoaSCLBlJExs=
-github.com/luntsev/notes-manager/auth v0.0.0-20250512122301-6a594e5bc1ea/go.mod h1:1QJ374otTk4Deez/R9jvJSvHxztEBf7kVo2+WtZ7kXA=
+github.com/luntsev/notes-manager/auth v0.0.0-20250512133937-e2f41b53e58a h1:7Y0+N24X7hE2Ekw/sLznvJnNXsWRK7mHvtP8W846fx0=
+github.com/luntsev/notes-manager/auth v0.0.0-20250512133937-e2f41b53e58a/go.mod h1:1QJ374otTk4Deez/R9jvJSvHxztEBf7kVo2+WtZ7kXA=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=

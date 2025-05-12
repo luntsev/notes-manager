@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/luntsev/notes-manager/auth/pkg/jwt"
 	"github.com/luntsev/notes-manager/notes/models"
 	"github.com/luntsev/notes-manager/notes/pkg/logs"
 	"github.com/luntsev/notes-manager/notes/repository"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -105,7 +106,7 @@ func (h *notesHandler) Delete(ctx *gin.Context) {
 
 // Получение списка всех заметок
 func (h *notesHandler) GetList(ctx *gin.Context) {
-	authorId := ctx.GetUint("1")
+	authorId := ctx.GetUint("id")
 
 	notes, err := h.repo.List(authorId, ctx.Request.Context())
 	if err != nil {
